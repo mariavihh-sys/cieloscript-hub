@@ -1,4 +1,4 @@
-# CieloScript Hub
+# Scripts - E-mail
 
 Hub compartilhado de scripts para o time de e-mail.
 
@@ -6,4 +6,4 @@ Site publicado: https://cieloscript-hub.mariavitoria0104.chatgpt.site
 
 ## Código-fonte
 
-O arquivo principal do aplicativo está em cieloscript-hub.html.
+O arquivo principal do aplicativo está em scripts-e-mail.html.
