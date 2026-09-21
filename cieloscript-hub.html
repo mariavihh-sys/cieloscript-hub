@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CieloScript Hub</title>
+  <meta name="description" content="Hub interno para localizar, preencher e copiar scripts de atendimento com rapidez." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23178de2'/%3E%3Cpath d='M42 20a17 17 0 1 0 0 24' fill='none' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --bg:#eef6ff;
+      --bg-2:#f9fcff;
+      --panel:#ffffff;
+      --panel-2:#f5faff;
+      --text:#16324f;
+      --muted:#68849b;
+      --border:#d7e7f5;
+      --primary:#3ca9f4;
+      --primary-2:#178de2;
+      --primary-3:#0b74c1;
+      --secondary:#7ccfff;
+      --accent:#eaf7ff;
+      --success:#24a46d;
+      --danger:#e05658;
+      --warning:#d9a120;
+      --violet:#7c6cf0;
+      --shadow:0 14px 32px rgba(40, 113, 163, .13);
+      --shadow-soft:0 8px 18px rgba(32, 112, 168, .09);
+      --radius:18px;
+      --radius-sm:13px;
+      --grad:linear-gradient(135deg, var(--primary), var(--primary-2));
+      --header-bg:rgba(249,252,255,.92);
+      --input:#ffffff;
+      --chip:#e8f5ff;
+      --overlay:rgba(5,24,43,.45);
+    }
+
+    body.dark{
+      --bg:#081320;
+      --bg-2:#0d1a2a;
+      --panel:#102032;
+      --panel-2:#15283c;
+      --text:#ebf4ff;
+      --muted:#9eb9d0;
+      --border:#1f3850;
+      --primary:#4ab4ff;
+      --primary-2:#2b97e8;
+      --primary-3:#1580d0;
+      --secondary:#8fd5ff;
+      --accent:#102b41;
+      --success:#2ebc80;
+      --danger:#ff7778;
+      --warning:#e8ba43;
+      --violet:#8f87ff;
+      --shadow:0 16px 36px rgba(0,0,0,.30);
+      --shadow-soft:0 8px 18px rgba(0,0,0,.20);
+      --header-bg:rgba(10,20,33,.88);
+      --input:#0f2134;
+      --chip:#18344d;
+      --overlay:rgba(0,0,0,.60);
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      min-height:100vh;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(111,203,255,.18) 0%, transparent 22%),
+        radial-gradient(circle at top left, rgba(63,169,234,.10) 0%, transparent 24%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
+      transition:background .25s ease,color .25s ease;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:30;
+      backdrop-filter: blur(12px);
+      background:var(--header-bg);
+      border-bottom:1px solid var(--border);
+    }
+
+    .topbar-inner{
+      max-width:1600px;
+      margin:auto;
+      padding:18px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      min-width:0;
+    }
+
+    .brand-icon{
+      width:62px;
+      height:62px;
+      border-radius:20px;
+      background:linear-gradient(135deg, #66c3ff, #198fe4);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      box-shadow:0 14px 28px rgba(40,145,214,.25);
+      flex:0 0 auto;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:16px;
+      color:var(--primary-3);
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-weight:900;
+    }
+
+    body.dark .brand h1{color:#7ecbff}
+
+    .brand h2{
+      margin:2px 0 0;
+      font-size:32px;
+      line-height:1.05;
+    }
+
+    .brand p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .header-controls{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-left:auto;
+    }
+    .header-controls.collapsed{display:none;}
+    .menu-toggle{margin-left:auto; white-space:nowrap;}
+
+    .search-wrap{
+      position:relative;
+      min-width:320px;
+      flex:1 1 360px;
+      max-width:440px;
+    }
+
+    .search-wrap svg{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      left:14px;
+      color:var(--primary-2);
+    }
+
+    .search{
+      width:100%;
+      border:1px solid var(--border);
+      background:var(--input);
+      color:var(--text);
+      border-radius:14px;
+      padding:13px 14px 13px 42px;
+      outline:none;
+      font-size:15px;
+      box-shadow:var(--shadow-soft);
+    }
+
+    .toggle, .tab-btn{
+      border:1px solid var(--border);
+      background:var(--panel);
+      color:var(--text);
+      border-radius:14px;
+      padding:12px 15px;
+      font-weight:800;
+      cursor:pointer;
+      display:inline-flex;
+      gap:9px;
+      align-items:center;
+      box-shadow:var(--shadow-soft);
+      transition:.2s ease;
+    }
+
+    .toggle:hover, .tab-btn:hover{transform:translateY(-1px)}
+    .tab-btn.active{
+      background:var(--grad);
+      color:#fff;
+      border-color:transparent;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .main{
+      max-width:1600px;
+      margin:24px auto;
+      padding:0 20px 28px;
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .section-label{
+      margin:0 0 12px;
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      font-weight:900;
+    }
+
+    .hidden{display:none !important;}
+
+    /* Generic content */
+    .empty{
+      padding:52px 18px;
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed var(--border);
+      border-radius:18px;
+      background:var(--panel-2);
+    }
+
+    input, textarea, select{
+      width:100%;
+      border:1px solid var(--border);
+      background:var(--input);
+      color:var(--text);
+      border-radius:13px;
+      padding:11px 12px;
+      font-size:14px;
+      outline:none;
+      resize:vertical;
+      font-family:inherit;
+    }
+
+    input:focus, textarea:focus, select:focus, .search:focus{
+      border-color:var(--primary-2);
+      box-shadow:0 0 0 4px rgba(53,162,234,.12);
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .btn{
+      border:0;
+      border-radius:13px;
+      padding:11px 15px;
+      cursor:pointer;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:.2s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{
+      background:var(--grad);
+      color:#fff;
+      box-shadow:0 12px 20px rgba(45,154,229,.20);
+    }
+    .btn-soft{
+      background:var(--panel-2);
+      color:var(--primary-3);
+      border:1px solid var(--border);
+    }
+    body.dark .btn-soft{color:#93d7ff}
+    .btn-success{background:var(--success); color:#fff}
+    .btn-danger{
+      background:#fff2f1;
+      color:var(--danger);
+      border:1px solid #f6d2d0;
+    }
+    body.dark .btn-danger{background:#31181c; border-color:#4d2327}
+    .btn-warning{
+      background:#fff8e7;
+      color:#9f740e;
+      border:1px solid #f0dfa8;
+    }
+    body.dark .btn-warning{background:#332914; border-color:#51411f; color:#f6cb65}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 11px;
+      border-radius:999px;
+      background:var(--chip);
+      color:var(--primary-3);
+      font-size:12px;
+      font-weight:900;
+      border:1px solid var(--border);
+      width:max-content;
+    }
+    body.dark .badge{color:#8bd3ff}
+
+    /* Time e-mail area */
+    .grid-time{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:20px;
+    }
+
+    .sidebar{
+      padding:18px;
+      position:sticky;
+      top:108px;
+      height:max-content;
+    }
+
+    .category-list{
+      display:flex;
+      flex-direction:column;
+      gap:9px;
+    }
+
+    .cat-btn{
+      border:1px solid var(--border);
+      background:var(--panel-2);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      font-weight:800;
+      transition:.2s ease;
+    }
+    .cat-btn:hover{transform:translateY(-1px)}
+    .cat-btn.active{
+      background:linear-gradient(135deg, #d9f0ff, #bee5ff);
+      color:#0b73be;
+      border-color:#b7ddfb;
+    }
+    body.dark .cat-btn.active{
+      background:linear-gradient(135deg, #173652, #1a466b);
+      color:#7ecbff;
+      border-color:#24527b;
+    }
+
+    .tip-box{
+      margin-top:16px;
+      background:linear-gradient(180deg, var(--panel-2), var(--accent));
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+    .tip-box b{color:var(--primary-3)}
+    body.dark .tip-box b{color:#85d2ff}
+
+    .content{
+      padding:20px;
+    }
+
+    .content-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .content-head h3{
+      margin:0;
+      font-size:24px;
+    }
+    .counter{
+      color:var(--muted);
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .script-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+      gap:18px;
+    }
+
+    .script-card{
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:var(--panel);
+      display:flex;
+      flex-direction:column;
+      min-height:440px;
+    }
+
+    .script-top{
+      padding:18px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-bottom:1px solid var(--border);
+    }
+
+    .badges{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .script-title{
+      margin:0;
+      font-size:19px;
+    }
+
+    .preview{
+      padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      background:var(--panel);
+    }
+
+    .preview-box{
+      min-height:170px;
+      white-space:pre-wrap;
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+      overflow:auto;
+    }
+
+    .token{
+      background:#d8f1ff;
+      color:#0c77c0;
+      border:1px solid #bfe3fb;
+      padding:2px 6px;
+      border-radius:999px;
+      font-weight:900;
+      display:inline-block;
+    }
+    body.dark .token{
+      background:#1a466b;
+      color:#94d8ff;
+      border-color:#2b5f89;
+    }
+    .token[contenteditable="true"]{
+      cursor:text;
+      outline:none;
+      min-width:54px;
+      border-style:dashed;
+      transition:.18s ease;
+    }
+    .token[contenteditable="true"]:hover,
+    .token[contenteditable="true"]:focus{
+      background:#fff;
+      color:var(--primary-3);
+      border-color:var(--primary-2);
+      box-shadow:0 0 0 3px rgba(53,162,234,.13);
+    }
+    body.dark .token[contenteditable="true"]:hover,
+    body.dark .token[contenteditable="true"]:focus{
+      background:#0f2134;
+      color:#b9e5ff;
+    }
+
+    .script-form{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      padding:16px 18px 18px;
+    }
+    .field.full{grid-column:1/-1}
+    .actions{
+      grid-column:1/-1;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      margin-top:3px;
+    }
+    .small-note{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* Forms pages */
+    .page-grid{
+      display:grid;
+      grid-template-columns:1fr 430px;
+      gap:20px;
+      align-items:start;
+    }
+    .page-panel{
+      padding:20px;
+    }
+    .page-panel h3{
+      margin:0;
+      font-size:24px;
+    }
+    .page-panel p{
+      margin:6px 0 16px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+    .form-grid{
+      display:grid;
+      gap:12px;
+    }
+    .form-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+    .records-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      max-height:680px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .record-item{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      box-shadow:var(--shadow-soft);
+    }
+    .record-item h4{
+      margin:0 0 8px;
+      font-size:18px;
+    }
+    .record-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:0 0 10px;
+    }
+    .record-body{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    /* Admin */
+    .admin-area{display:none; gap:20px; flex-direction:column}
+    .admin-area.active{display:flex}
+
+    .dashboard-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .dashboard-head h3{
+      margin:0;
+      font-size:28px;
+    }
+    .dashboard-head p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .status-chip{
+      padding:10px 13px;
+      background:var(--chip);
+      color:var(--primary-3);
+      border:1px solid var(--border);
+      border-radius:999px;
+      font-weight:900;
+      font-size:13px;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    body.dark .status-chip{color:#94d8ff}
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:16px;
+    }
+    .stat-card{
+      padding:18px;
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      box-shadow:var(--shadow-soft);
+      position:relative;
+      overflow:hidden;
+    }
+    .stat-card::after{
+      content:"";
+      position:absolute;
+      right:-22px;
+      top:-18px;
+      width:88px;
+      height:88px;
+      border-radius:50%;
+      background:rgba(98,184,246,.15);
+    }
+    .stat-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:14px;
+      position:relative;
+      z-index:1;
+    }
+    .stat-icon{
+      width:48px;
+      height:48px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      background:var(--chip);
+      color:var(--primary-3);
+      border:1px solid var(--border);
+    }
+    .stat-label{
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .stat-value{
+      font-size:30px;
+      font-weight:900;
+      position:relative;
+      z-index:1;
+    }
+    .stat-sub{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:8px;
+      position:relative;
+      z-index:1;
+      line-height:1.4;
+    }
+
+    .admin-layout{
+      display:grid;
+      grid-template-columns:420px 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .admin-panel{
+      padding:20px;
+    }
+    .admin-panel h4{
+      margin:0;
+      font-size:21px;
+    }
+    .admin-panel p{
+      margin:6px 0 16px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .admin-form{
+      display:grid;
+      gap:12px;
+    }
+    .help-box{
+      border:1px solid var(--border);
+      border-radius:15px;
+      background:var(--panel-2);
+      padding:13px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+    .help-box code{
+      background:var(--chip);
+      color:var(--primary-3);
+      padding:2px 7px;
+      border-radius:999px;
+      font-weight:900;
+      font-family:inherit;
+      border:1px solid var(--border);
+    }
+    body.dark .help-box code{color:#94d8ff}
+    .admin-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .admin-list-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+    .mini-search{
+      min-width:280px;
+      max-width:360px;
+      width:100%;
+    }
+
+    .admin-list{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:14px;
+    }
+    .admin-item{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      box-shadow:var(--shadow-soft);
+    }
+    .admin-item-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .admin-item h5{
+      margin:0 0 6px;
+      font-size:18px;
+    }
+    .admin-meta{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+    }
+    .admin-preview{
+      white-space:pre-wrap;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+      min-height:125px;
+      max-height:180px;
+      overflow:auto;
+    }
+    .admin-item-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:auto;
+    }
+
+    .admin-bottom{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:20px;
+    }
+
+    .notice-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .notice-card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      padding:16px;
+      box-shadow:var(--shadow-soft);
+    }
+    .notice-card h5{
+      margin:0 0 8px;
+      font-size:18px;
+    }
+    .notice-card p{
+      margin:0 0 14px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .notice-current{
+      white-space:pre-wrap;
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.55;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      min-height:120px;
+    }
+
+    .read-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:260px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .read-item{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      background:var(--panel);
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .footer-note{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:6px 4px 0;
+    }
+
+    /* Notice modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      background:var(--overlay);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
+    }
+    .modal.active{display:flex}
+    .modal-card{
+      width:min(560px,100%);
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .modal-header{
+      padding:18px 20px;
+      background:linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+    }
+    .modal-header h3{
+      margin:0;
+      font-size:22px;
+    }
+    .modal-header p{
+      margin:6px 0 0;
+      opacity:.92;
+      font-size:13px;
+    }
+    .modal-body{
+      padding:20px;
+      display:grid;
+      gap:14px;
+    }
+    .modal-message{
+      white-space:pre-wrap;
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+    }
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media(max-width:1360px){
+      .stats-grid{grid-template-columns:repeat(3,1fr)}
+      .admin-bottom{grid-template-columns:1fr}
+    }
+
+    @media(max-width:1200px){
+      .admin-layout{grid-template-columns:1fr}
+      .page-grid{grid-template-columns:1fr}
+      .notice-grid{grid-template-columns:1fr}
+    }
+
+    @media(max-width:1020px){
+      .grid-time{grid-template-columns:1fr}
+      .sidebar{position:static}
+    }
+
+    @media(max-width:780px){
+      .script-form{grid-template-columns:1fr}
+      .stats-grid{grid-template-columns:1fr}
+      .topbar-inner{padding:16px}
+      .main{padding:0 14px 22px}
+      .brand h2{font-size:24px}
+      .header-controls{width:100%}
+      .search-wrap{max-width:100%; min-width:100%}
+      .admin-list{grid-template-columns:1fr}
+      .tabs{width:100%}
+      .tab-btn{flex:1 1 calc(50% - 10px); justify-content:center}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6.4C4 5.63 4.63 5 5.4 5h13.2c.77 0 1.4.63 1.4 1.4v11.2c0 .77-.63 1.4-1.4 1.4H5.4c-.77 0-1.4-.63-1.4-1.4V6.4Z" stroke="white" stroke-width="1.8"/>
+            <path d="M4.7 7.2L12 12.8l7.3-5.6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Projeto</h1>
+          <h2>CieloScript Hub</h2>
+          <p>Central inteligente de scripts para e-mail com gestão, padronização e produtividade.</p>
+        </div>
+      </div>
+
+      <button class="toggle menu-toggle" id="menuToggle" type="button" aria-expanded="true">
+        <span id="menuToggleIcon">🙈</span>
+        <span id="menuToggleText">Ocultar opções</span>
+      </button>
+
+      <div class="header-controls" id="headerControls">
+        <div class="search-wrap" id="searchArea">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"></circle>
+            <path d="M20 20L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          <input id="searchInput" class="search" placeholder="Buscar por script, categoria ou conteúdo..." />
+        </div>
+
+        <button class="toggle" id="themeToggle" title="Alternar modo claro/escuro">
+          <span id="themeIcon">🌙</span>
+          <span id="themeText">Modo escuro</span>
+        </button>
+
+        <div class="tabs">
+          <button class="tab-btn active" id="btnTimeTab"><span>📧</span> Time e-mail</button>
+          <button class="tab-btn" id="btnSuggestionTab"><span>💡</span> Sugestão para script</button>
+          <button class="tab-btn" id="btnCaseTab"><span>📞</span> Acionamento de clientes</button>
+          <button class="tab-btn" id="btnAdminTab"><span>🔒</span> Administrador</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Time e-mail -->
+    <section id="timeArea" class="grid-time">
+      <aside class="panel sidebar">
+        <p class="section-label">Categorias</p>
+        <div id="categoryList" class="category-list"></div>
+
+        <div class="tip-box">
+          <b>Como personalizar:</b><br>
+          Clique nas <b>tags azuis</b> dentro do script e digite a informação desejada. A edição vale somente para a cópia e não altera o modelo original.
+        </div>
+      </aside>
+
+      <div class="panel content">
+        <div class="content-head">
+          <h3 id="contentTitle">Todos os scripts</h3>
+          <div class="counter" id="resultCount">0 scripts</div>
+        </div>
+        <div id="scriptGrid" class="script-grid"></div>
+      </div>
+    </section>
+
+    <!-- Sugestões -->
+    <section id="suggestionArea" class="page-grid hidden">
+      <div class="panel page-panel">
+        <h3>Sugestão para script</h3>
+        <p>Envie sugestões de novos textos ou melhorias para scripts já existentes. Essas sugestões também ficam visíveis para o administrador.</p>
+
+        <form id="suggestionForm" class="form-grid">
+          <div class="field">
+            <label for="suggestProcessType">Tipo de processo</label>
+            <input id="suggestProcessType" placeholder="Ex.: Acesso, Financeiro, Retorno, Cadastro" />
+          </div>
+
+          <div class="field">
+            <label for="suggestTitle">Título da sugestão</label>
+            <input id="suggestTitle" placeholder="Ex.: Resposta para dados incompletos" />
+          </div>
+
+          <div class="field">
+            <label for="suggestName">Seu nome</label>
+            <input id="suggestName" placeholder="Digite seu nome" />
+          </div>
+
+          <div class="field">
+            <label for="suggestContent">Sugestão de script</label>
+            <textarea id="suggestContent" rows="8" placeholder="Descreva aqui o texto sugerido do script ou a melhoria desejada..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">💾 Enviar sugestão</button>
+            <button class="btn btn-soft" type="button" id="clearSuggestionForm">🧹 Limpar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel page-panel">
+        <h3>Últimas sugestões enviadas</h3>
+        <p>Histórico recente de ideias registradas pelo time.</p>
+        <div id="suggestionList" class="records-list"></div>
+      </div>
+    </section>
+
+    <!-- Acionamento -->
+    <section id="caseArea" class="page-grid hidden">
+      <div class="panel page-panel">
+        <h3>Casos para acionamento de clientes</h3>
+        <p>Registre o chamado para que o caso fique documentado e visível também ao administrador.</p>
+
+        <form id="caseForm" class="form-grid">
+          <div class="field">
+            <label for="caseTicket">Chamado</label>
+            <input id="caseTicket" placeholder="Digite o número do chamado" />
+          </div>
+
+          <div class="field">
+            <label for="caseName">Nome do cliente</label>
+            <input id="caseName" placeholder="Digite o nome do cliente" />
+          </div>
+
+          <div class="field">
+            <label for="caseRequester">Registrado por</label>
+            <input id="caseRequester" placeholder="Digite seu nome" />
+          </div>
+
+          <div class="field">
+            <label for="caseReason">Motivo do acionamento</label>
+            <input id="caseReason" placeholder="Ex.: retorno pendente, confirmação de dados, resolução" />
+          </div>
+
+          <div class="field">
+            <label for="caseDescription">Descrição do caso</label>
+            <textarea id="caseDescription" rows="8" placeholder="Descreva as informações do chamado e o que precisa ser acionado com o cliente..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">💾 Registrar caso</button>
+            <button class="btn btn-soft" type="button" id="clearCaseForm">🧹 Limpar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel page-panel">
+        <h3>Chamados registrados</h3>
+        <p>Histórico recente dos casos cadastrados para acionamento de clientes.</p>
+        <div id="caseList" class="records-list"></div>
+      </div>
+    </section>
+
+    <!-- Admin -->
+    <section id="adminArea" class="admin-area hidden">
+      <div class="dashboard-head">
+        <div>
+          <h3>Painel do Administrador</h3>
+          <p>Gerencie scripts, acompanhe o uso do sistema, receba sugestões do time e dispare avisos para quem estiver no Time e-mail.</p>
+        </div>
+        <div class="status-chip">⚡ Painel dinâmico ativo</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div>
+              <div class="stat-label">Total de scripts</div>
+              <div class="stat-value" id="statScripts">0</div>
+            </div>
+            <div class="stat-icon">📄</div>
+          </div>
+          <div class="stat-sub">Quantidade total de scripts cadastrados no sistema.</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <div>
+              <div class="stat-label">Categorias</div>
+              <div class="stat-value" id="statCategories">0</div>
+            </div>
+            <div class="stat-icon">🏷️</div>
+          </div>
+          <div class="stat-sub">Número de categorias distintas com ícones automáticos.</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <div>
+              <div class="stat-label">Acessos ativos</div>
+              <div class="stat-value" id="statActiveUsers">1</div>
+            </div>
+            <div class="stat-icon">👥</div>
+          </div>
+          <div class="stat-sub">Sessões ativas detectadas no sistema neste momento.</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <div>
+              <div class="stat-label">Sugestões</div>
+              <div class="stat-value" id="statSuggestions">0</div>
+            </div>
+            <div class="stat-icon">💡</div>
+          </div>
+          <div class="stat-sub">Sugestões de script enviadas pelo time.</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <div>
+              <div class="stat-label">Chamados</div>
+              <div class="stat-value" id="statCases">0</div>
+            </div>
+            <div class="stat-icon">📞</div>
+          </div>
+          <div class="stat-sub">Casos cadastrados para acionamento de clientes.</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-top">
+            <div>
+              <div class="stat-label">Aviso ativo</div>
+              <div class="stat-value" id="statNotice">0</div>
+            </div>
+            <div class="stat-icon">📣</div>
+          </div>
+          <div class="stat-sub">Mostra se existe um aviso ativo para o Time e-mail.</div>
+        </div>
+      </div>
+
+      <div class="admin-layout">
+        <div class="panel admin-panel">
+          <h4 id="adminFormTitle">Adicionar novo script</h4>
+          <p>Cadastre um script padrão, edite um existente ou revise o conteúdo disponível para a equipe.</p>
+
+          <form id="adminForm" class="admin-form">
+            <input type="hidden" id="scriptId">
+
+            <div class="field">
+              <label class="section-label" for="adminCategory">Categoria</label>
+              <input id="adminCategory" placeholder="Ex.: Acesso, Cadastro, Financeiro, Retorno" />
+            </div>
+
+            <div class="field">
+              <label class="section-label" for="adminTitle">Título do script</label>
+              <input id="adminTitle" placeholder="Ex.: Falta de informações" />
+            </div>
+
+            <div class="field">
+              <label class="section-label" for="adminTemplate">Texto do script</label>
+              <textarea id="adminTemplate" rows="12" placeholder="Digite o script aqui..."></textarea>
+            </div>
+
+            <div class="help-box">
+              Escreva qualquer tag entre colchetes e em letras maiúsculas, como <code>[NOME]</code>, <code>[PROTOCOLO]</code> ou <code>[VALOR]</code>. Ela ficará editável para o operador diretamente no script, sem modificar o modelo original.
+            </div>
+
+            <div class="admin-actions">
+              <button type="submit" class="btn btn-primary">💾 Salvar script</button>
+              <button type="button" id="clearAdminForm" class="btn btn-soft">🧹 Limpar</button>
+              <button type="button" id="cancelEditBtn" class="btn btn-warning hidden">↩️ Cancelar edição</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel admin-panel">
+          <div class="admin-list-head">
+            <div>
+              <h4>Biblioteca de scripts</h4>
+              <p>Visualize, filtre, edite e exclua scripts cadastrados.</p>
+            </div>
+            <input id="adminSearch" class="mini-search" placeholder="Buscar script na biblioteca..." />
+          </div>
+
+          <div id="adminScriptList" class="admin-list"></div>
+        </div>
+      </div>
+
+      <div class="admin-bottom">
+        <div class="panel admin-panel">
+          <h4>Central de avisos para o Time e-mail</h4>
+          <p>Dispare avisos para quem estiver na aba Time e-mail. O aviso aparece em forma de pop-up e o colaborador precisa marcar como lido.</p>
+
+          <div class="notice-grid">
+            <div class="notice-card">
+              <h5>Novo aviso</h5>
+              <p>Crie um aviso e envie para o Time e-mail.</p>
+
+              <form id="noticeForm" class="admin-form">
+                <div class="field">
+                  <label for="noticeTitle">Título do aviso</label>
+                  <input id="noticeTitle" placeholder="Ex.: Mudança no script de acesso" />
+                </div>
+                <div class="field">
+                  <label for="noticeMessage">Mensagem</label>
+                  <textarea id="noticeMessage" rows="7" placeholder="Digite o aviso que deverá aparecer em pop-up para o time..."></textarea>
+                </div>
+                <div class="admin-actions">
+                  <button class="btn btn-primary" type="submit">📣 Disparar aviso</button>
+                  <button class="btn btn-warning" type="button" id="clearCurrentNotice">🗑️ Encerrar aviso atual</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="notice-card">
+              <h5>Aviso atual</h5>
+              <p>Visualize o aviso ativo e acompanhe as leituras.</p>
+              <div id="currentNoticeBox" class="notice-current">Nenhum aviso ativo no momento.</div>
+
+              <div style="height:14px"></div>
+
+              <h5>Leituras confirmadas</h5>
+              <div id="readList" class="read-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel admin-panel">
+          <h4>Registros recebidos do time</h4>
+          <p>Acompanhe sugestões de scripts e chamados para acionamento de clientes.</p>
+
+          <div class="notice-grid">
+            <div class="notice-card">
+              <h5>Últimas sugestões</h5>
+              <div id="adminSuggestionList" class="read-list"></div>
+            </div>
+            <div class="notice-card">
+              <h5>Últimos chamados</h5>
+              <div id="adminCaseList" class="read-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        CieloScript Hub · painel administrativo com proteção por senha · senha atual configurada no sistema.
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de aviso -->
+  <div id="noticeModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalNoticeTitle">Aviso</h3>
+        <p>Leia com atenção e marque como lido para continuar trabalhando.</p>
+      </div>
+      <div class="modal-body">
+        <div id="modalNoticeMessage" class="modal-message"></div>
+
+        <div class="field">
+          <label for="modalReaderName">Seu nome</label>
+          <input id="modalReaderName" placeholder="Digite seu nome para registrar a leitura" />
+        </div>
+
+        <div class="modal-actions">
+          <button id="modalMarkRead" class="btn btn-primary">✅ Marcar como lido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STORAGE_KEY = "cieloscript_hub_scripts_v6";
+  const THEME_KEY = "cieloscript_hub_theme";
+  const ADMIN_PASSWORD = "Email2026";
+  const PRESENCE_KEY = "cieloscript_hub_presence";
+  const SUGGESTION_KEY = "cieloscript_hub_suggestions";
+  const CASE_KEY = "cieloscript_hub_cases";
+  const NOTICE_KEY = "cieloscript_hub_current_notice";
+  const NOTICE_READS_KEY = "cieloscript_hub_notice_reads";
+
+  let selectedCategory = "Todos";
+  let activeTab = "time";
+  let adminAuthenticated = false;
+  const sessionId = "session-" + Math.random().toString(36).slice(2) + Date.now();
+
+  function createId(){
+    return "id-" + Math.random().toString(36).slice(2, 11) + Date.now().toString(36);
+  }
+
+  const defaults = [
+    {
+      id:createId(),
+      categoria:"Acesso",
+      titulo:"Falta de informações",
+      template:`Olá, [NOME].
+
+Para darmos continuidade à sua solicitação de acesso, precisamos das seguintes informações:
+
+[DADOS_FALTANTES]
+
+Protocolo: [PROTOCOLO]
+
+Assim que recebermos os dados, seguiremos com a análise.
+
+Atenciosamente,
+Equipe de Atendimento`
+    },
+    {
+      id:createId(),
+      categoria:"Acesso",
+      titulo:"Acesso normalizado",
+      template:`Olá, [NOME].
+
+Informamos que o acesso foi normalizado.
+
+Protocolo: [PROTOCOLO]
+
+Pedimos, por gentileza, que realize uma nova tentativa. Caso a dificuldade permaneça, responda a este e-mail com mais detalhes para nova análise.
+
+Atenciosamente,
+Equipe de Atendimento`
+    },
+    {
+      id:createId(),
+      categoria:"Cadastro",
+      titulo:"Dados cadastrais incompletos",
+      template:`Olá, [NOME].
+
+Identificamos pendências para concluir a sua solicitação cadastral.
+
+Dados faltantes:
+[DADOS_FALTANTES]
+
+Protocolo: [PROTOCOLO]
+
+Após o recebimento das informações, daremos continuidade ao atendimento.
+
+Atenciosamente,
+Equipe de Atendimento`
+    },
+    {
+      id:createId(),
+      categoria:"Financeiro",
+      titulo:"Solicitação em análise",
+      template:`Olá, [NOME].
+
+Sua solicitação foi recebida e está em análise pela área responsável.
+
+Protocolo: [PROTOCOLO]
+
+Caso seja necessário o envio de novos dados, entraremos em contato.
+
+Atenciosamente,
+Equipe de Atendimento`
+    },
+    {
+      id:createId(),
+      categoria:"Retorno",
+      titulo:"Aguardando retorno do cliente",
+      template:`Olá, [NOME].
+
+Para seguirmos com o atendimento, permanecemos aguardando o envio das informações abaixo:
+
+[DADOS_FALTANTES]
+
+Protocolo: [PROTOCOLO]
+
+Assim que recebermos o retorno, daremos continuidade.
+
+Atenciosamente,
+Equipe de Atendimento`
+    }
+  ];
+
+  function loadData(key, fallback){
+    const raw = localStorage.getItem(key);
+    if(!raw){
+      if(fallback !== undefined) localStorage.setItem(key, JSON.stringify(fallback));
+      return Array.isArray(fallback) ? [...fallback] : (fallback || null);
+    }
+    try{
+      return JSON.parse(raw);
+    }catch(e){
+      if(fallback !== undefined) localStorage.setItem(key, JSON.stringify(fallback));
+      return Array.isArray(fallback) ? [...fallback] : (fallback || null);
+    }
+  }
+
+  let scripts = loadData(STORAGE_KEY, defaults);
+  let suggestions = loadData(SUGGESTION_KEY, []);
+  let cases = loadData(CASE_KEY, []);
+  let currentNotice = loadData(NOTICE_KEY, null);
+  let noticeReads = loadData(NOTICE_READS_KEY, []);
+
+  async function saveSharedState(key, value, adminOnly = false){
+    try{
+      const response = await fetch(`/api/state/${key}`, {
+        method:"PUT",
+        headers:{"content-type":"application/json"},
+        body:JSON.stringify({ value, password: adminOnly ? ADMIN_PASSWORD : undefined })
+      });
+      if(!response.ok) throw new Error("Não foi possível salvar a atualização.");
+      return true;
+    }catch(error){
+      console.error(error);
+      alert("Não foi possível sincronizar esta alteração. Verifique a conexão e tente novamente.");
+      return false;
+    }
+  }
+
+  function saveScripts(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+    void saveSharedState("scripts", scripts, true);
+  }
+  function saveSuggestions(){
+    localStorage.setItem(SUGGESTION_KEY, JSON.stringify(suggestions));
+    void saveSharedState("suggestions", suggestions);
+  }
+  function saveCases(){
+    localStorage.setItem(CASE_KEY, JSON.stringify(cases));
+    void saveSharedState("cases", cases);
+  }
+
+  async function hydrateSharedState(){
+    const sources = [
+      ["scripts", STORAGE_KEY],
+      ["suggestions", SUGGESTION_KEY],
+      ["cases", CASE_KEY],
+      ["current_notice", NOTICE_KEY],
+      ["notice_reads", NOTICE_READS_KEY]
+    ];
+
+    try{
+      const results = await Promise.all(sources.map(async ([key, localKey]) => {
+        const response = await fetch(`/api/state/${key}`, {cache:"no-store"});
+        if(!response.ok) throw new Error(`Falha ao carregar ${key}`);
+        const data = await response.json();
+        return {key, localKey, value:data.value};
+      }));
+
+      results.forEach(({key, localKey, value}) => {
+        if(value === null){
+          const hasLocalData = localStorage.getItem(localKey) !== null;
+          if(hasLocalData){
+            const localValue = loadData(localKey, null);
+            void saveSharedState(key, localValue, key === "scripts" || key === "current_notice");
+          }
+          return;
+        }
+        if(key === "scripts") scripts = value;
+        if(key === "suggestions") suggestions = value;
+        if(key === "cases") cases = value;
+        if(key === "current_notice") currentNotice = value;
+        if(key === "notice_reads") noticeReads = value;
+        localStorage.setItem(localKey, JSON.stringify(value));
+      });
+      renderAll();
+    }catch(error){
+      console.error(error);
+      alert("O conteúdo compartilhado está temporariamente indisponível. Exibindo a cópia salva neste navegador.");
+    }
+  }
+
+  function categoryIcon(categoria){
+    const c = (categoria || "").toLowerCase();
+    if(c.includes("acesso")) return "🔐";
+    if(c.includes("cadastro")) return "📝";
+    if(c.includes("finance")) return "💰";
+    if(c.includes("retorno")) return "↩️";
+    if(c.includes("cancel")) return "❌";
+    if(c.includes("ouvid")) return "📢";
+    if(c.includes("cart")) return "💳";
+    return "📧";
+  }
+
+  function getCategories(){
+    return ["Todos", ...new Set(scripts.map(s => s.categoria).filter(Boolean))].sort((a,b)=>a.localeCompare(b, 'pt-BR'));
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    })[m]);
+  }
+
+  function formatDate(dateString){
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleString("pt-BR");
+  }
+
+  function highlightTokens(text){
+    return escapeHtml(text).replace(/\[([A-ZÀ-Ú0-9_ -]+)\]/g, (tag, tokenName) =>
+      `<span class="token" contenteditable="true" role="textbox" aria-label="Editar ${tokenName.replaceAll("_", " ")}" data-token="${tokenName}">${tag}</span>`
+    );
+  }
+
+  function fillTemplate(template, nome, protocolo, dados){
+    return template
+      .replaceAll("[NOME]", nome || "[NOME]")
+      .replaceAll("[PROTOCOLO]", protocolo || "[PROTOCOLO]")
+      .replaceAll("[DADOS_FALTANTES]", dados || "[DADOS_FALTANTES]");
+  }
+
+  function renderCategories(){
+    const root = document.getElementById("categoryList");
+    root.innerHTML = "";
+    getCategories().forEach(cat => {
+      const btn = document.createElement("button");
+      btn.className = "cat-btn" + (cat === selectedCategory ? " active" : "");
+      btn.innerHTML = `<span>${cat === "Todos" ? "📚" : categoryIcon(cat)}</span> <span>${escapeHtml(cat)}</span>`;
+      btn.onclick = () => {
+        selectedCategory = cat;
+        renderCategories();
+        renderTimeScripts();
+      };
+      root.appendChild(btn);
+    });
+  }
+
+  function currentFilteredScripts(){
+    const q = document.getElementById("searchInput").value.trim().toLowerCase();
+    return scripts.filter(item => {
+      const byCategory = selectedCategory === "Todos" || item.categoria === selectedCategory;
+      const hay = `${item.categoria} ${item.titulo} ${item.template}`.toLowerCase();
+      return byCategory && hay.includes(q);
+    });
+  }
+
+  function renderTimeScripts(){
+    const filtered = currentFilteredScripts();
+    document.getElementById("contentTitle").textContent = selectedCategory === "Todos" ? "Todos os scripts" : selectedCategory;
+    document.getElementById("resultCount").textContent = `${filtered.length} script${filtered.length === 1 ? "" : "s"}`;
+
+    const root = document.getElementById("scriptGrid");
+    if(!filtered.length){
+      root.innerHTML = `<div class="empty">Nenhum script encontrado para os filtros informados.</div>`;
+      return;
+    }
+
+    root.innerHTML = filtered.map(item => `
+      <article class="script-card">
+        <div class="script-top">
+          <div class="badges">
+            <span class="badge">${categoryIcon(item.categoria)} ${escapeHtml(item.categoria)}</span>
+            <span class="badge">📨 Pronto para copiar</span>
+          </div>
+          <h4 class="script-title">${escapeHtml(item.titulo)}</h4>
+        </div>
+
+        <div class="preview">
+          <div class="preview-box" data-editor="${item.id}">${highlightTokens(item.template)}</div>
+          <div class="small-note">Clique em uma tag azul para editar. O modelo original continuará intacto.</div>
+        </div>
+
+        <div class="script-form">
+          <div class="actions">
+            <button class="btn btn-primary" data-copy="${item.id}">📋 Copiar e-mail</button>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    bindTimeActions();
+  }
+
+  function bindTimeActions(){
+    document.querySelectorAll("[data-copy]").forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute("data-copy");
+        const item = scripts.find(s => s.id === id);
+        if(!item) return;
+        const editor = document.querySelector(`[data-editor="${id}"]`);
+        const finalText = editor?.innerText || item.template;
+
+        try{
+          await navigator.clipboard.writeText(finalText);
+        }catch(e){
+          const ta = document.createElement("textarea");
+          ta.value = finalText;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+
+        const old = btn.innerHTML;
+        btn.innerHTML = "✅ Copiado!";
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-success");
+        setTimeout(() => {
+          btn.innerHTML = old;
+          btn.classList.remove("btn-success");
+          btn.classList.add("btn-primary");
+        }, 1600);
+      };
+    });
+
+  }
+
+  function renderSuggestions(){
+    const list = document.getElementById("suggestionList");
+    if(!suggestions.length){
+      list.innerHTML = `<div class="empty">Nenhuma sugestão enviada até o momento.</div>`;
+      return;
+    }
+
+    const ordered = [...suggestions].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    list.innerHTML = ordered.map(item => `
+      <div class="record-item">
+        <h4>💡 ${escapeHtml(item.title)}</h4>
+        <div class="record-meta">
+          <span class="badge">🏷️ ${escapeHtml(item.processType)}</span>
+          <span class="badge">👤 ${escapeHtml(item.name || "Não informado")}</span>
+          <span class="badge">🕒 ${escapeHtml(formatDate(item.createdAt))}</span>
+        </div>
+        <div class="record-body">${escapeHtml(item.content)}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderCases(){
+    const list = document.getElementById("caseList");
+    if(!cases.length){
+      list.innerHTML = `<div class="empty">Nenhum chamado registrado até o momento.</div>`;
+      return;
+    }
+
+    const ordered = [...cases].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    list.innerHTML = ordered.map(item => `
+      <div class="record-item">
+        <h4>📞 Chamado ${escapeHtml(item.ticket)}</h4>
+        <div class="record-meta">
+          <span class="badge">👤 Cliente: ${escapeHtml(item.clientName || "Não informado")}</span>
+          <span class="badge">🧑‍💼 ${escapeHtml(item.requester || "Não informado")}</span>
+          <span class="badge">🕒 ${escapeHtml(formatDate(item.createdAt))}</span>
+        </div>
+        <div class="record-body"><b>Motivo:</b> ${escapeHtml(item.reason)}\n\n${escapeHtml(item.description)}</div>
+      </div>
+    `).join("");
+  }
+
+  function filteredAdminScripts(){
+    const q = document.getElementById("adminSearch").value.trim().toLowerCase();
+    return [...scripts]
+      .filter(item => `${item.categoria} ${item.titulo} ${item.template}`.toLowerCase().includes(q))
+      .sort((a,b) => {
+        const c = a.categoria.localeCompare(b.categoria, 'pt-BR');
+        return c !== 0 ? c : a.titulo.localeCompare(b.titulo, 'pt-BR');
+      });
+  }
+
+  function renderAdminList(){
+    const root = document.getElementById("adminScriptList");
+    const items = filteredAdminScripts();
+
+    if(!items.length){
+      root.innerHTML = `<div class="empty">Nenhum script encontrado na biblioteca.</div>`;
+      return;
+    }
+
+    root.innerHTML = items.map(item => `
+      <article class="admin-item">
+        <div class="admin-item-head">
+          <div>
+            <h5>${escapeHtml(item.titulo)}</h5>
+            <div class="admin-meta">${categoryIcon(item.categoria)} ${escapeHtml(item.categoria)}</div>
+          </div>
+          <span class="badge">${categoryIcon(item.categoria)} Categoria</span>
+        </div>
+
+        <div class="admin-preview">${escapeHtml(item.template)}</div>
+
+        <div class="admin-item-actions">
+          <button class="btn btn-soft" data-edit="${item.id}">✏️ Editar</button>
+          <button class="btn btn-danger" data-delete="${item.id}">🗑️ Excluir</button>
+        </div>
+      </article>
+    `).join("");
+
+    document.querySelectorAll("[data-edit]").forEach(btn => {
+      btn.onclick = () => {
+        const item = scripts.find(s => s.id === btn.getAttribute("data-edit"));
+        if(!item) return;
+        document.getElementById("scriptId").value = item.id;
+        document.getElementById("adminCategory").value = item.categoria;
+        document.getElementById("adminTitle").value = item.titulo;
+        document.getElementById("adminTemplate").value = item.template;
+        document.getElementById("adminFormTitle").textContent = "Editar script";
+        document.getElementById("cancelEditBtn").classList.remove("hidden");
+        window.scrollTo({top:0, behavior:"smooth"});
+      };
+    });
+
+    document.querySelectorAll("[data-delete]").forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.getAttribute("data-delete");
+        const item = scripts.find(s => s.id === id);
+        if(!item) return;
+        if(!confirm(`Deseja realmente excluir o script "${item.titulo}"?`)) return;
+        scripts = scripts.filter(s => s.id !== id);
+        saveScripts();
+        renderAll();
+        clearAdminForm();
+      };
+    });
+  }
+
+  function clearAdminForm(){
+    document.getElementById("scriptId").value = "";
+    document.getElementById("adminCategory").value = "";
+    document.getElementById("adminTitle").value = "";
+    document.getElementById("adminTemplate").value = "";
+    document.getElementById("adminFormTitle").textContent = "Adicionar novo script";
+    document.getElementById("cancelEditBtn").classList.add("hidden");
+  }
+
+  function renderAdminSupportLists(){
+    const adminSuggestionList = document.getElementById("adminSuggestionList");
+    const adminCaseList = document.getElementById("adminCaseList");
+
+    const latestSuggestions = [...suggestions].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+    const latestCases = [...cases].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+
+    adminSuggestionList.innerHTML = latestSuggestions.length
+      ? latestSuggestions.map(item => `
+        <div class="read-item">
+          <b>${escapeHtml(item.title)}</b><br>
+          Processo: ${escapeHtml(item.processType)}<br>
+          Nome: ${escapeHtml(item.name || "Não informado")}<br>
+          Data: ${escapeHtml(formatDate(item.createdAt))}
+        </div>
+      `).join("")
+      : `<div class="read-item">Nenhuma sugestão enviada.</div>`;
+
+    adminCaseList.innerHTML = latestCases.length
+      ? latestCases.map(item => `
+        <div class="read-item">
+          <b>Chamado ${escapeHtml(item.ticket)}</b><br>
+          Cliente: ${escapeHtml(item.clientName || "Não informado")}<br>
+          Motivo: ${escapeHtml(item.reason)}<br>
+          Data: ${escapeHtml(formatDate(item.createdAt))}
+        </div>
+      `).join("")
+      : `<div class="read-item">Nenhum chamado registrado.</div>`;
+  }
+
+  function getCurrentNotice(){
+    return currentNotice;
+  }
+
+  function saveCurrentNotice(notice){
+    currentNotice = notice;
+    if(notice){
+      localStorage.setItem(NOTICE_KEY, JSON.stringify(notice));
+    }else{
+      localStorage.removeItem(NOTICE_KEY);
+    }
+    void saveSharedState("current_notice", notice, true);
+  }
+
+  function getNoticeReads(){
+    return noticeReads;
+  }
+
+  function saveNoticeReads(reads){
+    noticeReads = reads;
+    localStorage.setItem(NOTICE_READS_KEY, JSON.stringify(reads));
+    void saveSharedState("notice_reads", reads);
+  }
+
+  function currentSessionReadNotice(noticeId){
+    const reads = getNoticeReads();
+    return reads.some(item => item.noticeId === noticeId && item.sessionId === sessionId);
+  }
+
+  function renderNoticeAdmin(){
+    const box = document.getElementById("currentNoticeBox");
+    const list = document.getElementById("readList");
+    const notice = getCurrentNotice();
+
+    if(!notice){
+      box.textContent = "Nenhum aviso ativo no momento.";
+      list.innerHTML = `<div class="read-item">Ainda não há um aviso ativo para acompanhamento.</div>`;
+      return;
+    }
+
+    box.textContent = `${notice.title}\n\n${notice.message}\n\nEnviado em: ${formatDate(notice.createdAt)}`;
+
+    const reads = getNoticeReads().filter(item => item.noticeId === notice.id).sort((a,b) => new Date(b.readAt) - new Date(a.readAt));
+    list.innerHTML = reads.length
+      ? reads.map(item => `
+          <div class="read-item">
+            <b>${escapeHtml(item.readerName)}</b><br>
+            Sessão: ${escapeHtml(item.sessionId)}<br>
+            Lido em: ${escapeHtml(formatDate(item.readAt))}
+          </div>
+        `).join("")
+      : `<div class="read-item">Ninguém marcou o aviso como lido ainda.</div>`;
+  }
+
+  function maybeShowNotice(){
+    const notice = getCurrentNotice();
+    const modal = document.getElementById("noticeModal");
+
+    if(activeTab !== "time"){
+      modal.classList.remove("active");
+      return;
+    }
+
+    if(!notice){
+      modal.classList.remove("active");
+      return;
+    }
+
+    if(currentSessionReadNotice(notice.id)){
+      modal.classList.remove("active");
+      return;
+    }
+
+    document.getElementById("modalNoticeTitle").textContent = notice.title;
+    document.getElementById("modalNoticeMessage").textContent = notice.message;
+    modal.classList.add("active");
+  }
+
+  function hideNoticeModal(){
+    document.getElementById("noticeModal").classList.remove("active");
+  }
+
+  function updateStats(){
+    const categories = new Set(scripts.map(s => s.categoria).filter(Boolean));
+    const hasNotice = getCurrentNotice() ? 1 : 0;
+    document.getElementById("statScripts").textContent = scripts.length;
+    document.getElementById("statCategories").textContent = categories.size;
+    document.getElementById("statActiveUsers").textContent = getActiveSessionsCount();
+    document.getElementById("statSuggestions").textContent = suggestions.length;
+    document.getElementById("statCases").textContent = cases.length;
+    document.getElementById("statNotice").textContent = hasNotice;
+  }
+
+  function renderAll(){
+    renderCategories();
+    renderTimeScripts();
+    renderSuggestions();
+    renderCases();
+    renderAdminList();
+    renderAdminSupportLists();
+    renderNoticeAdmin();
+    updateStats();
+    maybeShowNotice();
+  }
+
+  function showOnly(sectionId){
+    const sections = ["timeArea", "suggestionArea", "caseArea", "adminArea"];
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if(id === sectionId){
+        el.classList.remove("hidden");
+      }else{
+        el.classList.add("hidden");
+      }
+    });
+  }
+
+  function updateTabButtons(activeId){
+    const map = {
+      time: "btnTimeTab",
+      suggestion: "btnSuggestionTab",
+      case: "btnCaseTab",
+      admin: "btnAdminTab"
+    };
+    Object.values(map).forEach(id => document.getElementById(id).classList.remove("active"));
+    document.getElementById(map[activeId]).classList.add("active");
+  }
+
+  function setTab(tab){
+    if(tab === "admin" && !adminAuthenticated){
+      const senha = prompt("Digite a senha de administrador:");
+      if(senha === null) return;
+      if(senha !== ADMIN_PASSWORD){
+        alert("Senha incorreta.");
+        return;
+      }
+      adminAuthenticated = true;
+    }
+
+    activeTab = tab;
+    const adminArea = document.getElementById("adminArea");
+    const searchArea = document.getElementById("searchArea");
+
+    if(tab === "time"){
+      showOnly("timeArea");
+      adminArea.classList.remove("active");
+      searchArea.classList.remove("hidden");
+    }else if(tab === "suggestion"){
+      showOnly("suggestionArea");
+      adminArea.classList.remove("active");
+      searchArea.classList.add("hidden");
+    }else if(tab === "case"){
+      showOnly("caseArea");
+      adminArea.classList.remove("active");
+      searchArea.classList.add("hidden");
+    }else{
+      showOnly("adminArea");
+      adminArea.classList.add("active");
+      searchArea.classList.add("hidden");
+      updateStats();
+    }
+
+    updateTabButtons(tab);
+    maybeShowNotice();
+  }
+
+  function applyTheme(theme){
+    if(theme === "dark"){
+      document.body.classList.add("dark");
+      document.getElementById("themeIcon").textContent = "☀️";
+      document.getElementById("themeText").textContent = "Modo claro";
+    }else{
+      document.body.classList.remove("dark");
+      document.getElementById("themeIcon").textContent = "🌙";
+      document.getElementById("themeText").textContent = "Modo escuro";
+    }
+    localStorage.setItem(THEME_KEY, theme);
+  }
+
+  function initTheme(){
+    const saved = localStorage.getItem(THEME_KEY) || "light";
+    applyTheme(saved);
+  }
+
+  function toggleTheme(){
+    applyTheme(document.body.classList.contains("dark") ? "light" : "dark");
+  }
+
+  function getPresenceData(){
+    try{
+      return JSON.parse(localStorage.getItem(PRESENCE_KEY) || "{}");
+    }catch(e){
+      return {};
+    }
+  }
+
+  function savePresenceData(data){
+    localStorage.setItem(PRESENCE_KEY, JSON.stringify(data));
+  }
+
+  function cleanupPresence(){
+    const data = getPresenceData();
+    const now = Date.now();
+    Object.keys(data).forEach(key => {
+      if(now - data[key] > 20000){
+        delete data[key];
+      }
+    });
+    savePresenceData(data);
+  }
+
+  function updatePresence(){
+    cleanupPresence();
+    const data = getPresenceData();
+    data[sessionId] = Date.now();
+    savePresenceData(data);
+    updateStats();
+  }
+
+  function removePresence(){
+    const data = getPresenceData();
+    delete data[sessionId];
+    savePresenceData(data);
+  }
+
+  function getActiveSessionsCount(){
+    cleanupPresence();
+    return Object.keys(getPresenceData()).length || 1;
+  }
+
+  function toggleHeaderControls(){
+    const controls = document.getElementById("headerControls");
+    const button = document.getElementById("menuToggle");
+    const collapsed = controls.classList.toggle("collapsed");
+    button.setAttribute("aria-expanded", String(!collapsed));
+    document.getElementById("menuToggleIcon").textContent = collapsed ? "👀" : "🙈";
+    document.getElementById("menuToggleText").textContent = collapsed ? "Mostrar opções" : "Ocultar opções";
+  }
+
+  // Eventos
+  document.getElementById("searchInput").addEventListener("input", renderTimeScripts);
+  document.getElementById("adminSearch").addEventListener("input", renderAdminList);
+  document.getElementById("btnTimeTab").addEventListener("click", () => setTab("time"));
+  document.getElementById("btnSuggestionTab").addEventListener("click", () => setTab("suggestion"));
+  document.getElementById("btnCaseTab").addEventListener("click", () => setTab("case"));
+  document.getElementById("btnAdminTab").addEventListener("click", () => setTab("admin"));
+  document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+  document.getElementById("menuToggle").addEventListener("click", toggleHeaderControls);
+
+  document.getElementById("clearAdminForm").addEventListener("click", clearAdminForm);
+  document.getElementById("cancelEditBtn").addEventListener("click", clearAdminForm);
+
+  document.getElementById("adminForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = document.getElementById("scriptId").value.trim();
+    const categoria = document.getElementById("adminCategory").value.trim();
+    const titulo = document.getElementById("adminTitle").value.trim();
+    const template = document.getElementById("adminTemplate").value.trim();
+
+    if(!categoria || !titulo || !template){
+      alert("Preencha categoria, título e texto do script.");
+      return;
+    }
+
+    if(id){
+      scripts = scripts.map(item => item.id === id ? {...item, categoria, titulo, template} : item);
+    }else{
+      scripts.push({ id:createId(), categoria, titulo, template });
+    }
+
+    saveScripts();
+    renderAll();
+    clearAdminForm();
+    alert("Script salvo com sucesso.");
+  });
+
+  document.getElementById("suggestionForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const processType = document.getElementById("suggestProcessType").value.trim();
+    const title = document.getElementById("suggestTitle").value.trim();
+    const name = document.getElementById("suggestName").value.trim();
+    const content = document.getElementById("suggestContent").value.trim();
+
+    if(!processType || !title || !content){
+      alert("Preencha tipo de processo, título e sugestão.");
+      return;
+    }
+
+    suggestions.push({
+      id:createId(),
+      processType,
+      title,
+      name,
+      content,
+      createdAt:new Date().toISOString()
+    });
+
+    saveSuggestions();
+    renderSuggestions();
+    renderAdminSupportLists();
+    updateStats();
+    document.getElementById("suggestionForm").reset();
+    alert("Sugestão enviada com sucesso.");
+  });
+
+  document.getElementById("clearSuggestionForm").addEventListener("click", () => {
+    document.getElementById("suggestionForm").reset();
+  });
+
+  document.getElementById("caseForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const ticket = document.getElementById("caseTicket").value.trim();
+    const clientName = document.getElementById("caseName").value.trim();
+    const requester = document.getElementById("caseRequester").value.trim();
+    const reason = document.getElementById("caseReason").value.trim();
+    const description = document.getElementById("caseDescription").value.trim();
+
+    if(!ticket || !reason || !description){
+      alert("Preencha chamado, motivo do acionamento e descrição do caso.");
+      return;
+    }
+
+    cases.push({
+      id:createId(),
+      ticket,
+      clientName,
+      requester,
+      reason,
+      description,
+      createdAt:new Date().toISOString()
+    });
+
+    saveCases();
+    renderCases();
+    renderAdminSupportLists();
+    updateStats();
+    document.getElementById("caseForm").reset();
+    alert("Caso registrado com sucesso.");
+  });
+
+  document.getElementById("clearCaseForm").addEventListener("click", () => {
+    document.getElementById("caseForm").reset();
+  });
+
+  document.getElementById("noticeForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const title = document.getElementById("noticeTitle").value.trim();
+    const message = document.getElementById("noticeMessage").value.trim();
+
+    if(!title || !message){
+      alert("Preencha o título e a mensagem do aviso.");
+      return;
+    }
+
+    const notice = {
+      id:createId(),
+      title,
+      message,
+      createdAt:new Date().toISOString()
+    };
+
+    saveCurrentNotice(notice);
+    renderNoticeAdmin();
+    updateStats();
+    maybeShowNotice();
+    document.getElementById("noticeForm").reset();
+    alert("Aviso disparado com sucesso para o Time e-mail.");
+  });
+
+  document.getElementById("clearCurrentNotice").addEventListener("click", () => {
+    if(!confirm("Deseja encerrar o aviso atual?")) return;
+    saveCurrentNotice(null);
+    renderNoticeAdmin();
+    updateStats();
+    hideNoticeModal();
+  });
+
+  document.getElementById("modalMarkRead").addEventListener("click", () => {
+    const notice = getCurrentNotice();
+    if(!notice) return hideNoticeModal();
+
+    const readerName = document.getElementById("modalReaderName").value.trim();
+    if(!readerName){
+      alert("Digite seu nome para registrar a leitura.");
+      return;
+    }
+
+    const reads = getNoticeReads();
+    const already = reads.some(item => item.noticeId === notice.id && item.sessionId === sessionId);
+    if(!already){
+      reads.push({
+        noticeId: notice.id,
+        sessionId,
+        readerName,
+        readAt: new Date().toISOString()
+      });
+      saveNoticeReads(reads);
+    }
+
+    document.getElementById("modalReaderName").value = "";
+    hideNoticeModal();
+    renderNoticeAdmin();
+  });
+
+  window.addEventListener("beforeunload", removePresence);
+  window.addEventListener("storage", () => {
+    scripts = loadData(STORAGE_KEY, defaults);
+    suggestions = loadData(SUGGESTION_KEY, []);
+    cases = loadData(CASE_KEY, []);
+    renderAll();
+  });
+
+  function registerAgentTools(){
+    const context = document.modelContext;
+    if(!context?.registerTool) return;
+
+    context.registerTool({
+      name:"search_scripts",
+      title:"Buscar scripts",
+      description:"Busca scripts de atendimento por título, categoria ou conteúdo e mostra os resultados na tela.",
+      inputSchema:{
+        type:"object",
+        properties:{ query:{ type:"string", minLength:1 } },
+        required:["query"],
+        additionalProperties:false
+      },
+      annotations:{ readOnlyHint:true, untrustedContentHint:false },
+      execute({query}){
+        if(typeof query !== "string" || !query.trim()) throw new Error("Informe um termo de busca.");
+        setTab("time");
+        selectedCategory = "Todos";
+        document.getElementById("searchInput").value = query.trim();
+        renderCategories();
+        renderTimeScripts();
+        return currentFilteredScripts().slice(0,20).map(({id,categoria,titulo}) => ({id,categoria,titulo}));
+      }
+    });
+
+    context.registerTool({
+      name:"prepare_script",
+      title:"Preparar script",
+      description:"Preenche um script existente, atualiza a visualização e devolve o texto final pronto para uso.",
+      inputSchema:{
+        type:"object",
+        properties:{
+          scriptId:{ type:"string", minLength:1 },
+          nome:{ type:"string" },
+          protocolo:{ type:"string" },
+          dados:{ type:"string" }
+        },
+        required:["scriptId"],
+        additionalProperties:false
+      },
+      annotations:{ readOnlyHint:false, untrustedContentHint:false },
+      execute({scriptId,nome="",protocolo="",dados=""}){
+        const item = scripts.find(script => script.id === scriptId);
+        if(!item) throw new Error("Script não encontrado.");
+        setTab("time");
+        selectedCategory = item.categoria;
+        document.getElementById("searchInput").value = "";
+        renderCategories();
+        renderTimeScripts();
+        const values = {NOME:String(nome), PROTOCOLO:String(protocolo), DADOS_FALTANTES:String(dados)};
+        Object.entries(values).forEach(([token,value]) => {
+          if(!value) return;
+          document.querySelectorAll(`[data-editor="${scriptId}"] [data-token="${token}"]`).forEach(field => {
+            field.textContent = value;
+          });
+        });
+        const editor = document.querySelector(`[data-editor="${scriptId}"]`);
+        return {id:item.id, titulo:item.titulo, texto:editor?.innerText || item.template};
+      }
+    });
+  }
+
+  initTheme();
+  updatePresence();
+  setInterval(updatePresence, 8000);
+  renderAll();
+  setTab("time");
+  registerAgentTools();
+  void hydrateSharedState();
+</script>
+</body>
+</html>
